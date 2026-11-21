@@ -7,7 +7,8 @@ payload that unpacks to pure standard-library Python.
 - 0x88 board, legal move generation with castling, en passant and promotions.
 - Iterative-deepening negamax alpha-beta with a transposition table,
   null-move pruning (skipped in check and when the mover has only king and
-  pawns), late-move reductions and MVV-LVA plus history move ordering.
+  pawns), reverse futility pruning at depth 1-2, late-move reductions and
+  MVV-LVA plus history move ordering.
 - Quiescence search over captures and promotions, quiet push-promotions
   included; a check at the horizon gets one more full ply first.
 - Repetition: positions from the game history and the current search path
@@ -17,10 +18,10 @@ payload that unpacks to pure standard-library Python.
 ## Evaluation
 Material, piece-square tables (separate king tables for middlegame and
 endgame), doubled and isolated pawn penalties, a rank-scaled passed-pawn
-bonus and the bishop pair.
+bonus, the bishop pair and rooks on open or half-open files.
 
 ## Budget and determinism
-Each move searches a fixed 95,000 nodes, a quarter of that from ply 60 on;
+Each move searches a fixed 87,000 nodes, a quarter of that from ply 60 on;
 a depth cut short keeps its best move so far. A single legal move is played
 at once. No clock and no randomness: the same position and history always
 give the same move.
