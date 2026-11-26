@@ -13,9 +13,14 @@ This adapter translates between UCI/FEN and that representation:
   are path-independent sums over the pieces on the board, so they can be
   recomputed directly.
 
-Search is the engine's fixed-node search (default 130,000 nodes, the
-budget the submitted version was tuned at). `go nodes N` overrides it;
-`go movetime` / clock times are converted at the measured rate below.
+Search is the engine's fixed-node search. With no clock on the `go`
+line it uses the submitted version's budget (130,000 nodes). `go nodes
+N` overrides it; `go movetime` and clock times are converted at the
+measured rate below. On a clock the budget scales with the time left:
+about a thirtieth of the remaining time plus half the increment, never
+more than a third of the clock or 60 seconds, so rapid and classical
+games think several times deeper than the fixed budget while blitz
+stays safely inside the flag.
 """
 import importlib.util
 import os
@@ -131,20 +136,20 @@ class Position:
         return move_to_uci(bm, self.flipped), E.N
 
 
-def parse_go(tokens):
+def parse_go(tokens, flipped=False):
     args = dict(zip(tokens[::2], tokens[1::2])) if tokens else {}
     if "nodes" in args:
         return max(1000, int(args["nodes"]))
     if "movetime" in args:
         return int(min(300000, max(5000, int(args["movetime"]) * NODES_PER_SECOND // 1000)))
-    times = [k for k in ("wtime", "btime") if k in args]
-    if times:
-        # We do not know our colour from the go line alone in every client;
-        # use the smaller clock as a safe bound, plus increment if given.
-        remain = min(int(args[k]) for k in times)
-        inc = int(args.get("winc", args.get("binc", 0)))
-        budget_ms = remain // 20 + inc // 2
-        return int(min(200000, max(5000, budget_ms * NODES_PER_SECOND // 1000)))
+    # Use our own clock: `flipped` means Black is to move.
+    tkey, ikey = ("btime", "binc") if flipped else ("wtime", "winc")
+    if tkey in args:
+        remain = max(0, int(args[tkey]) - 300)  # keep a small clock buffer
+        inc = int(args.get(ikey, 0))
+        budget_ms = remain // 30 + inc // 2
+        budget_ms = max(200, min(budget_ms, remain // 3, 60000))
+        return int(min(2200000, max(5000, budget_ms * NODES_PER_SECOND // 1000)))
     return DEFAULT_NODES
 
 
@@ -174,7 +179,7 @@ def main():
                 moves = rest[end + 1:] if "moves" in rest else []
                 pos.set_fen(" ".join(rest[1:end]), moves)
         elif cmd == "go":
-            nodes = parse_go(rest)
+            nodes = parse_go(rest, pos.flipped)
             t0 = time.time()
             bm, used = pos.bestmove(nodes)
             dt = max(time.time() - t0, 0.001)
