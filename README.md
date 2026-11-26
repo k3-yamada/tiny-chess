@@ -51,4 +51,12 @@ The engine was rebuilt in a recorded Claude Code session on
   and spare plies (697) as the reference file. Across three practice
   trials the reference scored Elo 2112 / 1809 / 1451 (mean 1791).
 
+## UCI engine and Lichess bot
+
+The same engine also lives outside the contest, in the `uci/`
+folder: the readable source, a UCI adapter for chess GUIs and bot
+bridges, its verification suite, and a minimal Lichess bot bridge.
+It plays on Lichess as the bot
+[AZALLY](https://lichess.org/@/AZALLY). See `uci/README.md`.
+
 MIT licensed; see LICENSE.
