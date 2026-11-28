@@ -33,12 +33,13 @@ python3 uci.py
 
 Speaks UCI: `uci`, `isready`, `ucinewgame`, `position startpos|fen
 ... [moves ...]`, `go nodes N | go movetime MS | go wtime ...`,
-`quit`. With no clock the budget is the contest's 130,000 nodes
-(about 3.5 s per move on the build VM, ~36k nodes/s). `go nodes`
-overrides it. On a clock the budget scales with the time left
-(about a thirtieth of the remaining time plus half the increment,
-capped at a third of the clock and at 60 s), added 2026-11-27 for
-the Lichess bot.
+`quit`. With no clock the budget is the contest's 130,000 nodes.
+`go nodes` overrides it. On a clock the budget scales with the
+time left (about a thirtieth of the remaining time plus half the
+increment, capped at a third of the clock and at 10 s), added
+2026-11-27 for the Lichess bot. The nodes/s figure was corrected
+to this VM's measured ~8k on 2026-11-28: at the build VM's ~36k
+the first move took 60-90 s of real time and opponents aborted.
 
 ## Verified 2026-11-26
 

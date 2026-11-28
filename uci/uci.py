@@ -34,7 +34,7 @@ E = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(E)
 
 DEFAULT_NODES = 130000
-NODES_PER_SECOND = 36000  # measured on the build VM at the default budget
+NODES_PER_SECOND = 8000  # measured on this VM under the Lichess bridge (~7,700 nodes/s, 2026-11-27)
 
 START = (E.I, 0j, 24, 3, 3, 0, 0)
 
@@ -148,7 +148,7 @@ def parse_go(tokens, flipped=False):
         remain = max(0, int(args[tkey]) - 300)  # keep a small clock buffer
         inc = int(args.get(ikey, 0))
         budget_ms = remain // 30 + inc // 2
-        budget_ms = max(200, min(budget_ms, remain // 3, 60000))
+        budget_ms = max(200, min(budget_ms, remain // 3, 10000))
         return int(min(2200000, max(5000, budget_ms * NODES_PER_SECOND // 1000)))
     return DEFAULT_NODES
 
